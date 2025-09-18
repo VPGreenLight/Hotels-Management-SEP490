@@ -1,4 +1,3 @@
-
 /Backend/HotelManagement/.vs
 /Backend/HotelManagement/.idea
 /Backend/.idea
@@ -19,3 +18,4 @@ bin/
 appsettings.*.json
 .env
 */target/*
+/Frontend/hotel-management-frontend/node_modules
