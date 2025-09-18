@@ -18,4 +18,5 @@ bin/
 appsettings.*.json
 .env
 */target/*
+/Frontend/hotel-management-frontend/.env
 /Frontend/hotel-management-frontend/node_modules

@@ -1,3 +1,4 @@
+
 ﻿global using HotelManagement.Common.Constant;
 global using HotelManagement.Common.Enum;
 global using HotelManagement.Entities;
@@ -33,3 +34,5 @@ namespace HotelManagement.Services
         }
     }
 }
+
+
