@@ -1,4 +1,4 @@
-# Hotel-Management-SEP490
+# Hotels-Management-SEP490
 
 Dự án Hotel Management cho chuỗi Khách sạn Trường Sơn tại Sầm Sơn, Thanh Hóa là một hệ thống quản lý toàn diện nhằm tối ưu hóa hoạt động kinh doanh khách sạn, từ đặt phòng đến quản lý tài chính và dịch vụ khách hàng.
 
