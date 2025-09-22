@@ -1,9 +1,9 @@
-﻿using HotelManagement.Models.ResponseDtos;
-using HotelManagement.Services.IServices;
+﻿using HotelManagement.Application.IServices;
+using HotelManagement.Domain.ResponseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HopeBox.Web.Controller
+namespace HotelManagement.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
