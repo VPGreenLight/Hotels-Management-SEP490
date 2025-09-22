@@ -1,8 +1,7 @@
-﻿using HotelManagement.Entities;
-using HotelManagement.EntityFramework;
-using HotelManagement.EntityFramework.DataContext;
-using HotelManagement.Services;
-using HotelManagement.Services.Config;
+﻿using HotelManagement.Application;
+using HotelManagement.Infrastructure.DataContext;
+using HotelManagement.Infrastructure.Config;
+using HotelManagement.Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -72,7 +71,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddCors(
     options => options.AddPolicy(name: "CORS-Allow",
         policy => policy
-            .WithOrigins(new string[] { "https://localhost:7066", "http://localhost:7066" })
+            .WithOrigins(new string[] { "https://localhost:3000", "http://localhost:3000" })
             .SetIsOriginAllowed(origin => true)
             .AllowAnyHeader()
             .AllowAnyMethod()

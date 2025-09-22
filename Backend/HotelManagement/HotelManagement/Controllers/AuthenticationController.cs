@@ -1,13 +1,13 @@
 ﻿using Duende.IdentityModel;
-using HotelManagement.Models.Dtos;
-using HotelManagement.Models.RequestDtos;
-using HotelManagement.Models.ResponseDtos;
-using HotelManagement.Services.IAspModelService;
-using HotelManagement.Services.IServices;
+using HotelManagement.Domain.Dtos;
+using HotelManagement.Domain.RequestDtos;
+using HotelManagement.Domain.ResponseDtos;
+using HotelManagement.Application.IAspModelService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HotelManagement.Application.IServices;
 
-namespace HotelManagement.Controllers
+namespace HotelManagement.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
