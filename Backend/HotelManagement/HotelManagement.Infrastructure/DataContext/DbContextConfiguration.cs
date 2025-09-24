@@ -11,7 +11,7 @@ namespace HotelManagement.Infrastructure.DataContext
 	{
 		public static void AddDbConfig(this IServiceCollection services, IConfiguration configs) 
 		{
-			services.AddDbContext<HotelManagementDataContext>(options => options.UseSqlServer(configs.GetConnectionString("SqlServer")));
+			services.AddDbContext<HotelManagementDataContext>(options => options.UseSqlServer(configs.GetConnectionString("SQLServer")));
 		}
 	}
 }
