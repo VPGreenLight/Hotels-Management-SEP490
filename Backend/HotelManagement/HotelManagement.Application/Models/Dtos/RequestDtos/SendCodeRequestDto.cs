@@ -1,4 +1,4 @@
-﻿namespace HotelManagement.Domain.RequestDtos
+﻿namespace HotelManagement.Application.Models.Dtos.RequestDtos
 {
     public class SendCodeRequestDto
     {

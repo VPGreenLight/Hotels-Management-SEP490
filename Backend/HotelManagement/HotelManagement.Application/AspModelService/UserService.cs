@@ -1,14 +1,15 @@
 ﻿using HotelManagement.Infrastructure.Repository;
 using HotelManagement.Infrastructure.Converter;
 using HotelManagement.Application.IAspModelService;
+using HotelManagement.Application.Models.Dtos.RequestDtos;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Infrastructure.R2Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using HotelManagement.Domain.Models;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.ResponseDtos;
-using HotelManagement.Domain.RequestDtos;
+using HotelManagement.Domain.Models.Entities;
 
 namespace HotelManagement.Services.AspModelService
 {

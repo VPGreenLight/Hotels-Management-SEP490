@@ -3,6 +3,8 @@ using System.Linq.Expressions;
 
 namespace HotelManagement.Infrastructure.Repository
 {
+    //Todo: Add Pagination support
+    //Todo: Use tracking as input attribute instead of creating multiple methods as below.
     public interface IRepository<T> where T : class
     {
         Task<T?> GetByIdAsync(object id);

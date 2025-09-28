@@ -1,5 +1,6 @@
 ﻿using HotelManagement.Application.IAspModelService;
 using HotelManagement.Application.IServices;
+using HotelManagement.Application.Services;
 using HotelManagement.Infrastructure.Converter;
 using HotelManagement.Infrastructure.Email;
 using HotelManagement.Infrastructure.R2Storage;
@@ -7,7 +8,6 @@ using HotelManagement.Infrastructure.Repository;
 using HotelManagement.Infrastructure.Services;
 using HotelManagement.Infrastructure.Token;
 using HotelManagement.Services.AspModelService;
-using HotelManagement.Services.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HotelManagement.Application

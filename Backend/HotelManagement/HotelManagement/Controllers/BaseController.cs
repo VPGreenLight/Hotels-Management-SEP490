@@ -1,5 +1,5 @@
 ﻿using HotelManagement.Application.IServices;
-using HotelManagement.Domain.ResponseDtos;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

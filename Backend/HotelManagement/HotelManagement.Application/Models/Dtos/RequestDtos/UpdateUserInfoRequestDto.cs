@@ -1,6 +1,6 @@
-﻿using HotelManagement.Common.Enum;
+﻿using HotelManagement.Domain.Models.Enums;
 
-namespace HotelManagement.Domain.RequestDtos
+namespace HotelManagement.Application.Models.Dtos.RequestDtos
 {
     public class UpdateUserInfoRequestDto
     {

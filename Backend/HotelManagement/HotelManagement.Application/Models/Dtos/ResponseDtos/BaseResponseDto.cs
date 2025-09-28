@@ -1,4 +1,4 @@
-﻿namespace HotelManagement.Domain.ResponseDtos
+﻿namespace HotelManagement.Application.Models.Dtos.ResponseDtos
 {
     public class BaseResponseDto<T>
     {

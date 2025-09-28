@@ -1,4 +1,4 @@
-using HotelManagement.Common.Enum;
+using HotelManagement.Domain.Models.Enums;
 
 namespace HotelManagement.Domain.Dtos
 {

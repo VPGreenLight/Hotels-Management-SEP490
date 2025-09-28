@@ -1,14 +1,14 @@
-﻿using HotelManagement.Infrastructure.Repository;
-using HotelManagement.Infrastructure.Converter;
-using HotelManagement.Domain.Models;
+﻿using HotelManagement.Application.IServices;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.ResponseDtos;
-using HotelManagement.Application.IServices;
+using HotelManagement.Domain.Models;
+using HotelManagement.Infrastructure.Converter;
+using HotelManagement.Infrastructure.Repository;
 
-namespace HotelManagement.Services.Services
+namespace HotelManagement.Application.Services
 {
     public class BaseService<TModel, TDto> : IBaseService<TModel, TDto>
-            where TModel : BaseModel
+            where TModel : BaseEntity
             where TDto : BaseModelDto
     {
         protected readonly IRepository<TModel> _repository;

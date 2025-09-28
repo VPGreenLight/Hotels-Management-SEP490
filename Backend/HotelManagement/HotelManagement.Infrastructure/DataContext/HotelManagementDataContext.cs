@@ -1,4 +1,5 @@
 ﻿using HotelManagement.Domain.Models;
+using HotelManagement.Domain.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

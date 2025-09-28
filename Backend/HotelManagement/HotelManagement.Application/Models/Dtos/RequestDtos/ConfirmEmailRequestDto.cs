@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HotelManagement.Domain.RequestDtos
+namespace HotelManagement.Application.Models.Dtos.RequestDtos
 {
     public class ConfirmEmailRequestDto
     {

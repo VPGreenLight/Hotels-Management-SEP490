@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using HotelManagement.Domain.Models.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 

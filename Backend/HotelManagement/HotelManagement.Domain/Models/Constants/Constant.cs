@@ -1,6 +1,6 @@
-﻿namespace HotelManagement.Common.Constant
+﻿namespace HotelManagement.Domain.Models.Constants
 {
-    public class Constant
+    public static class Constant
     {
         public const string LowercaseChars = "abcdefghijklmnopqrstuvwxyz";
         public const string UppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

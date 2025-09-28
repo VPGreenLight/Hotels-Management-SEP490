@@ -1,23 +1,25 @@
-﻿using HotelManagement.Infrastructure.Repository;
-using HotelManagement.Infrastructure.Email;
-using HotelManagement.Infrastructure.Token;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using HotelManagement.Application.IServices;
+using HotelManagement.Application.Models.Dtos.RequestDtos;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Models;
-using HotelManagement.Domain.ResponseDtos;
-using HotelManagement.Domain.RequestDtos;
-using HotelManagement.Common.Enum;
-using HotelManagement.Common.Constant;
-
-namespace HotelManagement.Services.Services
+using HotelManagement.Domain.Models.Constants;
+using HotelManagement.Domain.Models.Entities;
+using HotelManagement.Domain.Models.Enums;
+using HotelManagement.Infrastructure.Email;
+using HotelManagement.Infrastructure.Repository;
+using HotelManagement.Infrastructure.Token;
+using Microsoft.AspNetCore.Identity;
+//Todo: add unit of work support
+//Todo: Add more exception support instead of Exception only (NotFoundException, ArgumentException...)
+namespace HotelManagement.Application.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<UserRole> _userRoleRepository;
-        private readonly IRepository<ConfirmEmail> _confirmEmailRepository;
+        private readonly IRepository<EmailConfirmation> _confirmEmailRepository;
         private readonly IRepository<RefreshToken> _refreshTokenRepository;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
@@ -25,7 +27,7 @@ namespace HotelManagement.Services.Services
 
         public AuthenticationService(
             IRepository<User> userRepository, 
-            IRepository<ConfirmEmail> confirmEmailRepository, 
+            IRepository<EmailConfirmation> confirmEmailRepository, 
             ITokenService tokenService, 
             IEmailService emailService, 
             IRepository<RefreshToken> refreshTokenRepository, 
@@ -120,7 +122,7 @@ namespace HotelManagement.Services.Services
                 };
             }
 
-            var confirmEmail = await _confirmEmailRepository.GetOneAsyncUntracked<ConfirmEmail>(
+            var confirmEmail = await _confirmEmailRepository.GetOneAsyncUntracked<EmailConfirmation>(
                 c => c.UserId == user.Id && c.ConfirmCode == request.ConfirmCode);
 
             if (confirmEmail == null || confirmEmail.ExpiresAt < DateTime.UtcNow)
@@ -255,11 +257,12 @@ namespace HotelManagement.Services.Services
                 {
                     Id = Guid.NewGuid(),
                     NormalizedEmail = request.Email.ToUpper(),
-                    NormalizedUserName = request.FullName.ToUpper(),
+                    NormalizedUserName = $"{request.FirstName} {request.LastName}".ToUpper(),
                     SecurityStamp = Guid.NewGuid().ToString(),
                     Email = request.Email,
-                    UserName = request.FullName,
-                    FullName = request.FullName,
+                    UserName = request.UserName,
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
                     DateOfBirth = request.DateOfBirth,
                     Gender = request.Gender,
                     PhoneNumber = request.PhoneNumber,
@@ -339,7 +342,7 @@ namespace HotelManagement.Services.Services
 
             string confirmCode = GenerateVerificationCode(8);
 
-            var confirmEmail = new ConfirmEmail
+            var confirmEmail = new EmailConfirmation
             {
                 UserId = user.Id,
                 ConfirmCode = confirmCode,

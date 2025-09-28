@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HotelManagement.Domain.Models.Entities;
 
 namespace HotelManagement.Domain.Models
 {
-    public class ConfirmEmail : BaseModel
+    public class EmailConfirmation : BaseEntity
     {
         [Required]
         public Guid? UserId { get; set; }

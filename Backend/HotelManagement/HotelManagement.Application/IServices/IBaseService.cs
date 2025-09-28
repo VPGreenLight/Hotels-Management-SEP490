@@ -1,4 +1,4 @@
-﻿using HotelManagement.Domain.ResponseDtos;
+﻿using HotelManagement.Application.Models.Dtos.ResponseDtos;
 
 namespace HotelManagement.Application.IServices
 {
