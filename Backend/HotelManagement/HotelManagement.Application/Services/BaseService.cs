@@ -2,6 +2,7 @@
 using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
 using HotelManagement.Domain.Models;
+using HotelManagement.Domain.Models.Entities;
 using HotelManagement.Infrastructure.Converter;
 using HotelManagement.Infrastructure.Repository;
 

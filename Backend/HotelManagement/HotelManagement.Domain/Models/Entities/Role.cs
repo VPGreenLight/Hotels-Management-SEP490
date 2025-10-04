@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace HotelManagement.Domain.Models
+namespace HotelManagement.Domain.Models.Entities
 {
     public class Role : IdentityRole<Guid>
     {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HotelManagement.Domain.Models
+namespace HotelManagement.Domain.Models.Entities
 {
     public class BaseEntity
     {

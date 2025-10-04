@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using HotelManagement.Domain.Models.Entities;
+using Task = System.Threading.Tasks.Task;
 
 var builder = WebApplication.CreateBuilder(args);
 
