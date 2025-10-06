@@ -1,6 +1,6 @@
 namespace HotelManagement.Domain.Models.Enums;
 
-public enum TaskType
+public enum JobType
 {
     Cleaning,
     Serving,

@@ -1,6 +1,6 @@
 namespace HotelManagement.Domain.Models.Enums;
 
-public enum TaskPriority
+public enum JobPriority
 {
     Low,
     Medium,

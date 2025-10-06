@@ -11,7 +11,8 @@ public class MaintenancePolicy : BaseEntity
 
     public int IntervalDays { get; set; }
 
-    [ForeignKey("Branch")] public Guid? BranchId { get; set; }
+    [ForeignKey("Branch")] 
+    public Guid? BranchId { get; set; }
     public virtual Branch? Branch { get; set; }
 
     public string? ContactPersonName { get; set; }

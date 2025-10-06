@@ -20,6 +20,10 @@ public class Branch : BaseEntity
     public int TotalRooms { get; set; }
 
     public int ParkingSlotsCount { get; set; }
-
-    public DateTime CreatedAt { get; set; }
+    
+    public virtual ICollection<Room>? Rooms { get; set; }
+    public virtual ICollection<Service>? Services { get; set; }
+    public virtual ICollection<Job>? Jobs { get; set; }
+    public virtual ICollection<Attendance>? Attendances { get; set; }
+    public virtual ICollection<EntryExit>? EntryExits { get; set; }
 }

@@ -1,6 +1,6 @@
 namespace HotelManagement.Domain.Models.Enums;
 
-public enum TaskStatus
+public enum JobStatus
 {
     New,
     InProgress,

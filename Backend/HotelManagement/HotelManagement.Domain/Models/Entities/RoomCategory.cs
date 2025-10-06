@@ -16,4 +16,7 @@ public class RoomCategory : BaseEntity
     public string? Amenities { get; set; }
 
     public int Capacity { get; set; }
+    
+    public virtual ICollection<Room>? Rooms { get; set; }
+    public virtual ICollection<RoomInventoryTemplate>? InventoryTemplates { get; set; }
 }

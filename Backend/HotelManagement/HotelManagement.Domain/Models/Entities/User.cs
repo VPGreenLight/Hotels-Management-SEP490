@@ -25,5 +25,10 @@ namespace HotelManagement.Domain.Models.Entities
 
         public virtual ICollection<RefreshToken>? RefreshTokens { get; set; }
         public virtual ICollection<EmailConfirmation>? ConfirmEmails { get; set; }
+        public virtual ICollection<Booking>? ReceptionistBookings { get; set; }
+        public virtual ICollection<Job>? AssignedJobs { get; set; }
+        public virtual ICollection<Attendance>? Attendances { get; set; }
+        public virtual ICollection<Lead>? AssignedLeads { get; set; }
+        public virtual ICollection<ServiceUsage>? RecordedServiceUsages { get; set; }
     }
 }

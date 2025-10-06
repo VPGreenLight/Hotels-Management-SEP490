@@ -13,6 +13,10 @@ public class Booking : BaseEntity
     [ForeignKey("Receptionist")]
     public Guid ReceptionistId { get; set; }
     public virtual User Receptionist { get; set; } = null!;
+    
+    [ForeignKey("Room")]
+    public Guid RoomId { get; set; }
+    public virtual Room Room { get; set; } = null!;
 
     [Required]
     [MaxLength(50)]
@@ -26,12 +30,29 @@ public class Booking : BaseEntity
 
     public DateTime? ActualCheckOut { get; set; }
 
-    public BookingStatus Status { get; set; }
+    public BookingStatus Status { get; set; } = BookingStatus.Pending;
+    
+    [Range(1, 20)]
+    public int NumberOfGuests { get; set; }
+    
+    [Range(1, 365)]
+    public int NumberOfNights { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal TotalAmount { get; set; }
+    [Range(0, 999999999.99)]
+    public decimal RoomRate { get; set; } // Giá phòng tại thời điểm đặt
+    
+    [Column(TypeName = "decimal(18,2)")]
+    [Range(0, 999999999.99)]
+    public decimal TotalRoomAmount { get; set; } // Tổng tiền phòng
 
-    public virtual ICollection<BookItem>? BookItems { get; set; }
+    [MaxLength(1000)]
+    public string? SpecialRequests { get; set; } // Yêu cầu đặc biệt
+    
+    [MaxLength(2000)]
+    public string? Notes { get; set; }
 
+    // Navigation properties
     public virtual ICollection<Invoice>? Invoices { get; set; }
+    public virtual ICollection<ServiceUsage>? ServiceUsages { get; set; } // Dịch vụ sử dụng trong kỳ lưu trú
 }

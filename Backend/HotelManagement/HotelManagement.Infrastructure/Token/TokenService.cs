@@ -45,7 +45,7 @@ namespace HotelManagement.Infrastructure.Token
                 new(JwtClaimTypes.Id, user.Id.ToString()),
                 new(JwtClaimTypes.Name, user.UserName!),
                 new(JwtClaimTypes.Email, user.Email!),
-                new(JwtClaimTypes.GivenName, user.FirstName + " " + user.LastName),
+                new(JwtClaimTypes.GivenName, $"{user.FirstName} {user.LastName}"),
             };
 
             foreach (var role in userRoles)
@@ -56,7 +56,7 @@ namespace HotelManagement.Infrastructure.Token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddHours(tokenValidityInHours),
+                Expires = DateTime.UtcNow.AddHours(tokenValidityInHours),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
@@ -78,7 +78,7 @@ namespace HotelManagement.Infrastructure.Token
 
             if (lastToken != null && lastToken.ExpiredTime > DateTime.Now)
             {
-                return lastToken.Token;
+                return lastToken.Token!;
             }
 
             var refreshToken = Guid.NewGuid().ToString();
@@ -90,8 +90,8 @@ namespace HotelManagement.Infrastructure.Token
             {
                 Token = refreshToken,
                 UserId = user.Id,
-                CreateTime = DateTime.Now,
-                ExpiredTime = DateTime.Now.AddDays(refreshTokenValidity),
+                CreateTime = DateTime.UtcNow,
+                ExpiredTime = DateTime.UtcNow.AddDays(refreshTokenValidity),
             };
 
             await _refreshTokenRepository.AddAsync(refreshTokenEntity);

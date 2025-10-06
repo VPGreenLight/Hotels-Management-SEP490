@@ -3,7 +3,7 @@ using HotelManagement.Domain.Models.Enums;
 
 namespace HotelManagement.Domain.Models.Entities;
 
-public class Request
+public class Request : BaseEntity
 {
     public RequestType RequestType { get; set; }
 
@@ -21,11 +21,11 @@ public class Request
     public Guid BranchId { get; set; }
     public virtual Branch Branch { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; }
-
     [ForeignKey("ApprovedBy")]
     public Guid? ApprovedById { get; set; }
     public virtual User? ApprovedBy { get; set; }
 
     public string? AttachmentUrl { get; set; }
+    
+    public virtual ICollection<Job>? Jobs { get; set; }
 }
