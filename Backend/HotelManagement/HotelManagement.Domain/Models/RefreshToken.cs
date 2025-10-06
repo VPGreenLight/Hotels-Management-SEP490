@@ -1,7 +1,11 @@
-﻿namespace HotelManagement.Domain.Models
+﻿using System.ComponentModel.DataAnnotations;
+using HotelManagement.Domain.Models.Entities;
+
+namespace HotelManagement.Domain.Models
 {
-    public class RefreshToken : BaseModel
+    public class RefreshToken : BaseEntity
     {
+        [MaxLength(1000)]
         public string? Token { get; set; }
 
         public DateTime CreateTime { get; set; }

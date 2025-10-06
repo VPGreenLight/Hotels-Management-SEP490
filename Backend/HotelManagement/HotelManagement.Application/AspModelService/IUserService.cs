@@ -1,6 +1,6 @@
-﻿using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.RequestDtos;
-using HotelManagement.Domain.ResponseDtos;
+﻿using HotelManagement.Application.Models.Dtos.RequestDtos;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
+using HotelManagement.Domain.Dtos;
 using Microsoft.AspNetCore.Http;
 
 namespace HotelManagement.Application.IAspModelService
