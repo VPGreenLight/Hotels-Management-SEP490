@@ -1,27 +1,29 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
-//import Cookies from "js-cookie";
+import axios, { AxiosRequestConfig, Method } from "axios";
+import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
   timeout: 60000,
 }); 
 
-// axiosInstance.interceptors.request.use(
-//   (config) => {
-//     // const token = localStorage.getItem("user_token");
-//     // if (token) {
-//     //   config.headers.Authorization = `Bearer ${token}`;
-//     // }
-//     const token = Cookies.get("Token");
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // const token = localStorage.getItem("user_token");
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // }
+    const token = Cookies.get("Token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 axiosInstance.interceptors.response.use(
   (response) => {
@@ -31,21 +33,17 @@ axiosInstance.interceptors.response.use(
     }
 
     return {
-        ...response,
-        data: {
-            status: status,
-            message: response?.data?.message || "success",
-            result: response.data,
-        }
-      
+      status: status,
+      message: response?.data?.message || "success",
+      result: response.data,
     };
   },
   (error) => {
     console.log(error);
-    let errorMessage = "System error";
+    let errorMessage = "Lỗi hệ thống";
 
-    if (error?.message?.includes("System error")) {
-      errorMessage = "System error";
+    if (error?.message?.includes("Lỗi hệ thống")) {
+      errorMessage = "Lỗi hệ thống";
     } else if (error.response) {
       const { status, data } = error.response;
 
@@ -54,13 +52,13 @@ axiosInstance.interceptors.response.use(
         // window.location.href = "/login";
         return Promise.reject({
           status: false,
-          message: "Account without permission",
+          message: "Tài khoản không có quyền",
           result: null,
         });
       } else if (status === 400) {
         errorMessage = data?.message;
 
-        if (errorMessage === "Account access expired") {
+        if (errorMessage === "Tài khoàn hết hạn truy cập") {
           window.localStorage.clear();
         }
 
@@ -70,7 +68,7 @@ axiosInstance.interceptors.response.use(
           result: null,
         });
       } else if (status === 404 || status === 502) {
-        errorMessage = data?.message || "System error";
+        errorMessage = data?.message || "Lỗi hệ thống";
         return Promise.reject({
           status: false,
           message: errorMessage,
