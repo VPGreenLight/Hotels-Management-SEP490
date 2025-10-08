@@ -1,3 +1,4 @@
+using HotelManagement.Infrastructure.Repository;
 using Microsoft.Extensions.DependencyInjection;
 using NetCore.AutoRegisterDi;
 
@@ -8,8 +9,11 @@ public static class DiExtensions
     public static IServiceCollection RegisterScopedRepositories(this IServiceCollection services)
     {
         services.RegisterAssemblyPublicNonGenericClasses()
-            .Where(c => c.Name.EndsWith("Repository"))
+            .Where(c => c.Name.EndsWith("Service"))
             .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
+
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        
         return services;
     }
 }

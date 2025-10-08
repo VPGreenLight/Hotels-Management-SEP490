@@ -3,7 +3,7 @@ using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
 using Microsoft.AspNetCore.Http;
 
-namespace HotelManagement.Application.IAspModelService
+namespace HotelManagement.Application.AspModelService
 {
     public interface IUserService
     {

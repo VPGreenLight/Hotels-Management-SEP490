@@ -15,37 +15,19 @@ using Microsoft.AspNetCore.Identity;
 //Todo: Add more exception support instead of Exception only (NotFoundException, ArgumentException...)
 namespace HotelManagement.Application.Services
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService(
+        IRepository<User> userRepository,
+        IRepository<EmailConfirmation> confirmEmailRepository,
+        ITokenService tokenService,
+        IEmailService emailService,
+        IRepository<RefreshToken> refreshTokenRepository,
+        IRepository<UserRole> userRoleRepository,
+        UserManager<User> userManager)
+        : IAuthenticationService
     {
-        private readonly IRepository<User> _userRepository;
-        private readonly IRepository<UserRole> _userRoleRepository;
-        private readonly IRepository<EmailConfirmation> _confirmEmailRepository;
-        private readonly IRepository<RefreshToken> _refreshTokenRepository;
-        private readonly ITokenService _tokenService;
-        private readonly IEmailService _emailService;
-        private readonly UserManager<User> _userManager;
-
-        public AuthenticationService(
-            IRepository<User> userRepository, 
-            IRepository<EmailConfirmation> confirmEmailRepository, 
-            ITokenService tokenService, 
-            IEmailService emailService, 
-            IRepository<RefreshToken> refreshTokenRepository, 
-            IRepository<UserRole> userRoleRepository, 
-            UserManager<User> userManager)
-        {
-            _userRepository = userRepository;
-            _confirmEmailRepository = confirmEmailRepository;
-            _tokenService = tokenService;
-            _emailService = emailService;
-            _refreshTokenRepository = refreshTokenRepository;
-            _userRoleRepository = userRoleRepository;
-            _userManager = userManager;
-        }
-
         public async Task<BaseResponseDto<LoginResponseDto>> AdminLogin(LoginRequestDto loginDto)
         {
-            var user = await _userRepository.GetOneAsync(
+            var user = await userRepository.GetOneAsync(
                 filter: u => u.Email == loginDto.LoginEmail);
 
             if (user == null)
@@ -82,7 +64,7 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var userRoles = await _userManager.GetRolesAsync(user);
+            var userRoles = await userManager.GetRolesAsync(user);
 
             if (!userRoles.Contains("Admin"))
             {
@@ -94,8 +76,8 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
-            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
+            var accessToken = await tokenService.CreateAccessTokenAsync(user);
+            var refreshToken = await tokenService.CreateRefreshTokenAsync(user);
 
             return new BaseResponseDto<LoginResponseDto>
             {
@@ -111,7 +93,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<bool>> ConfirmEmail(ConfirmEmailRequestDto request)
         {
-            var user = await _userRepository.GetOneAsync(u => u.Email == request.ConfirmEmail);
+            var user = await userRepository.GetOneAsync(u => u.Email == request.ConfirmEmail);
             if (user == null)
             {
                 return new BaseResponseDto<bool>
@@ -122,7 +104,7 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var confirmEmail = await _confirmEmailRepository.GetOneAsync(
+            var confirmEmail = await confirmEmailRepository.GetOneAsync(
                 c => c.UserId == user.Id && c.ConfirmCode == request.ConfirmCode);
 
             if (confirmEmail == null || confirmEmail.ExpiresAt < DateTime.UtcNow)
@@ -139,9 +121,9 @@ namespace HotelManagement.Application.Services
 
             user.UserStatus = UserStatus.Active;
 
-            await _userRepository.UpdateAsync(user);
+            await userRepository.UpdateAsync(user);
 
-            await _confirmEmailRepository.UpdateAsync(confirmEmail);
+            await confirmEmailRepository.UpdateAsync(confirmEmail);
 
             return new BaseResponseDto<bool>
             {
@@ -153,7 +135,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<LoginResponseDto>> Login(LoginRequestDto request)
         {
-            var user = await _userRepository.GetOneAsync(filter: f => f.Email == request.LoginEmail);
+            var user = await userRepository.GetOneAsync(filter: f => f.Email == request.LoginEmail);
             if (user == null)
             {
                 return new BaseResponseDto<LoginResponseDto>
@@ -187,8 +169,8 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
-            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
+            var accessToken = await tokenService.CreateAccessTokenAsync(user);
+            var refreshToken = await tokenService.CreateRefreshTokenAsync(user);
 
             return new BaseResponseDto<LoginResponseDto>
             {
@@ -204,7 +186,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<RefreshTokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
-            var refreshToken = await _refreshTokenRepository.GetOneAsync(
+            var refreshToken = await refreshTokenRepository.GetOneAsync(
                 filter: f => f.Token == request.RefreshToken && f.ExpiredTime > DateTime.UtcNow);
 
             if (refreshToken == null)
@@ -219,7 +201,7 @@ namespace HotelManagement.Application.Services
             
             var userId = refreshToken.UserId;
 
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await userRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
@@ -231,8 +213,8 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
-            var newRefreshToken = await _tokenService.CreateRefreshTokenAsync(user);
+            var accessToken = await tokenService.CreateAccessTokenAsync(user);
+            var newRefreshToken = await tokenService.CreateRefreshTokenAsync(user);
 
             return new BaseResponseDto<RefreshTokenResponseDto>
             {
@@ -249,10 +231,10 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<bool>> Register(RegisterRequestDto request)
         {
-            using var transaction = await _userRepository.BeginTransactionAsync();
+            using var transaction = await userRepository.BeginTransactionAsync();
             try
             {
-                var existingUser = await _userRepository.GetOneAsync(u => u.Email == request.Email);
+                var existingUser = await userRepository.GetOneAsync(u => u.Email == request.Email);
                 if (existingUser != null)
                 {
                     return new BaseResponseDto<bool>
@@ -283,9 +265,9 @@ namespace HotelManagement.Application.Services
                 var passwordHasher = new PasswordHasher<User>();
                 newUser.PasswordHash = passwordHasher.HashPassword(newUser, request.Password);
 
-                await _userRepository.AddAsync(newUser);
+                await userRepository.AddAsync(newUser);
 
-                await _userRepository.CommitTransactionAsync(transaction);
+                await userRepository.CommitTransactionAsync(transaction);
 
                 return new BaseResponseDto<bool>
                 {
@@ -296,7 +278,7 @@ namespace HotelManagement.Application.Services
             }
             catch (Exception ex)
             {
-                await _userRepository.RollbackTransactionAsync(transaction);
+                await userRepository.RollbackTransactionAsync(transaction);
                 return new BaseResponseDto<bool>
                 {
                     Status = 500,
@@ -318,7 +300,7 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var user = await _userRepository.GetOneAsync(u => u.Email == email);
+            var user = await userRepository.GetOneAsync(u => u.Email == email);
             if (user == null)
             {
                 return new BaseResponseDto<bool>
@@ -339,7 +321,7 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var oldCodes = await _confirmEmailRepository.GetListAsync(
+            var oldCodes = await confirmEmailRepository.GetListAsync(
                 c => c.UserId == user.Id && !c.IsConfirmed && c.ExpiresAt > DateTime.UtcNow
             );
 
@@ -348,7 +330,7 @@ namespace HotelManagement.Application.Services
                 old.IsConfirmed = true;
             }
 
-            await _confirmEmailRepository.UpdateRangeAsync(oldCodes);
+            await confirmEmailRepository.UpdateRangeAsync(oldCodes);
 
             string confirmCode = GenerateVerificationCode(8);
 
@@ -361,12 +343,12 @@ namespace HotelManagement.Application.Services
                 IsConfirmed = false
             };
 
-            await _confirmEmailRepository.AddAsync(confirmEmail);
+            await confirmEmailRepository.AddAsync(confirmEmail);
 
             string subject = "Xác thực tài khoản HopeBox";
             string body = $"Mã xác thực của bạn là: <strong>{confirmCode}</strong>";
 
-            await _emailService.SendEmailAsync(user.Email, subject, body);
+            await emailService.SendEmailAsync(user.Email, subject, body);
 
             return new BaseResponseDto<bool>
             {

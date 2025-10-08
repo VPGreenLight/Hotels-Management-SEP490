@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
+using HotelManagement.Application.Mappings;
 using HotelManagement.Application.Utilities;
 using HotelManagement.Domain.Models.Entities;
 using HotelManagement.Infrastructure.Utilities;
@@ -21,7 +23,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Thêm config cho SQL Server
+// Add config for SQL
 builder.Services.AddDbConfig(builder.Configuration);
 
 builder.Services.AddSingleton<IConfig, Config>();
@@ -29,6 +31,8 @@ builder.Services.AddScoped<IHotelManagementDataContext, HotelManagementDataConte
 
 builder.Services.RegisterScopedRepositories();
 builder.Services.RegisterScopedServices();
+
+builder.Services.AddAutoMapper(config => { }, typeof(MapProfile).Assembly);
 
 builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<HotelManagementDataContext>()

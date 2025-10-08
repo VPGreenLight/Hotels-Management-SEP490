@@ -1,31 +1,22 @@
-﻿using HotelManagement.Application.IServices;
+﻿using AutoMapper;
+using HotelManagement.Application.IServices;
 using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.Models;
 using HotelManagement.Domain.Models.Entities;
-using HotelManagement.Infrastructure.Converter;
 using HotelManagement.Infrastructure.Repository;
 
 namespace HotelManagement.Application.Services
 {
-    public class BaseService<TModel, TDto> : IBaseService<TModel, TDto>
-            where TModel : BaseEntity
-            where TDto : BaseModelDto
+    public class BaseService<TModel, TDto>(IRepository<TModel> repository, IMapper mapper)
+        : IBaseService<TModel, TDto>
+        where TModel : BaseEntity
+        where TDto : BaseModelDto
     {
-        protected readonly IRepository<TModel> _repository;
-        protected readonly IConverter<TModel, TDto> _converter;
-
-        public BaseService(IRepository<TModel> repository, IConverter<TModel, TDto> converter)
-        {
-            _repository = repository;
-            _converter = converter;
-        }
-
         public async Task<BaseResponseDto<TDto>> GetByIdAsync(Guid id)
         {
             try
             {
-                var entity = await _repository.GetByIdAsync(id);
+                var entity = await repository.GetByIdAsync(id);
                 if (entity == null)
                 {
                     return new BaseResponseDto<TDto>
@@ -36,7 +27,7 @@ namespace HotelManagement.Application.Services
                     };
                 }
 
-                var dto = _converter.ToDTO(entity);
+                var dto = mapper.Map<TDto>(entity);
                 return new BaseResponseDto<TDto>
                 {
                     Status = 200,
@@ -55,110 +46,11 @@ namespace HotelManagement.Application.Services
             }
         }
 
-        public async Task<BaseResponseDto<IEnumerable<TDto>>> GetAllAsync()
+        public async Task<BaseResponseDto<bool>> DeleteByIdAsync(Guid id)
         {
             try
             {
-                var entities = await _repository.GetListAsync();
-                var dtos = _converter.ToListDTO(entities);
-
-                return new BaseResponseDto<IEnumerable<TDto>>
-                {
-                    Status = 200,
-                    Message = "Success",
-                    ResponseData = dtos
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDto<IEnumerable<TDto>>
-                {
-                    Status = 500,
-                    Message = ex.Message,
-                    ResponseData = null
-                };
-            }
-        }
-
-        public async Task<BaseResponseDto<bool>> AddAsync(TDto dto)
-        {
-            try
-            {
-                dto.Id = Guid.NewGuid();
-                var model = _converter.ToModel(dto);
-                await _repository.AddAsync(model);
-
-                return new BaseResponseDto<bool>
-                {
-                    Status = 201,
-                    Message = "Add successful",
-                    ResponseData = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDto<bool>
-                {
-                    Status = 500,
-                    Message = ex.Message,
-                    ResponseData = false
-                };
-            }
-        }
-
-        public async Task<BaseResponseDto<bool>> UpdateAsync(TDto dto)
-        {
-            try
-            {
-                var entity = await _repository.GetOneAsync(filter: f => f.Id == dto.Id);
-                if (entity == null)
-                {
-                    return new BaseResponseDto<bool>
-                    {
-                        Status = 404,
-                        Message = "Entity not found",
-                        ResponseData = false
-                    };
-                }
-
-                var dtoProps = dto.GetType().GetProperties();
-                var entityProps = entity.GetType().GetProperties();
-
-                foreach (var dtoProp in dtoProps)
-                {
-                    var entityProp = entityProps.FirstOrDefault(p => p.Name == dtoProp.Name && p.CanWrite);
-                    if (entityProp != null)
-                    {
-                        var dtoValue = dtoProp.GetValue(dto);
-                        entityProp.SetValue(entity, dtoValue);
-                    }
-                }
-
-                await _repository.UpdateAsync(entity);
-
-                return new BaseResponseDto<bool>
-                {
-                    Status = 200,
-                    Message = "Update successful",
-                    ResponseData = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDto<bool>
-                {
-                    Status = 500,
-                    Message = ex.Message,
-                    ResponseData = false
-                };
-            }
-        }
-
-        public async Task<BaseResponseDto<bool>> DeleteAsync(Guid id)
-        {
-            try
-            {
-                var entity = await _repository.GetByIdAsync(id);
+                var entity = await repository.GetByIdAsync(id);
                 if (entity == null)
                 {
                     return new BaseResponseDto<bool>
@@ -169,7 +61,7 @@ namespace HotelManagement.Application.Services
                     };
                 }
 
-                await _repository.DeleteAsync(entity);
+                await repository.DeleteAsync(entity);
                 return new BaseResponseDto<bool>
                 {
                     Status = 200,
@@ -184,30 +76,6 @@ namespace HotelManagement.Application.Services
                     Status = 500,
                     Message = ex.Message,
                     ResponseData = false
-                };
-            }
-        }
-
-        public async Task<BaseResponseDto<int>> GetCountAsync()
-        {
-            try
-            {
-                var count = await _repository.GetCount();
-
-                return new BaseResponseDto<int>
-                {
-                    Status = 200,
-                    Message = "Success",
-                    ResponseData = count
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDto<int>
-                {
-                    Status = 500,
-                    Message = ex.Message,
-                    ResponseData = 0
                 };
             }
         }
