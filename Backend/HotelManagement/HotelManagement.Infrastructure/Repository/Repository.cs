@@ -19,13 +19,8 @@ namespace HotelManagement.Infrastructure.Repository
             return await _context.Set<T>().FindAsync(id);
         }
 
-        public async Task<T?> GetByIdAsync(object id, Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null)
+        public async Task<T?> GetByIdAsync(object id, Expression<Func<IQueryable<T>, IQueryable<T>>> include)
         {
-            if (include == null)
-            {
-                return await _context.Set<T>().FindAsync(id);
-            }
-
             var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.FirstOrDefault();
             if (keyProperty == null)
             {
@@ -39,12 +34,9 @@ namespace HotelManagement.Infrastructure.Repository
             var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
 
             IQueryable<T> query = _context.Set<T>();
-
-            if (include != null)
-            {
-                query = include.Compile()(query);
-            }
-
+            
+            query = include.Compile()(query);
+            
             return await query.Where(lambda).FirstOrDefaultAsync();
         }
 
@@ -89,85 +81,17 @@ namespace HotelManagement.Infrastructure.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TResult?> GetOneAsyncUntracked<TResult>(
-            Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<T, TResult>>? selector = null, Expression<Func<IQueryable<T>,
-            IQueryable<T>>>? include = null)
-        {
-            IQueryable<T> query = _context.Set<T>().AsNoTracking();
-
-            if (include != null)
-            {
-                query = include.Compile()(query);
-            }
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (orderBy != null)
-            {
-                query = orderBy.Compile()(query);
-            }
-
-            if (selector != null)
-            {
-                return await query.Select(selector).FirstOrDefaultAsync();
-            }
-            else
-            {
-                return await query.Cast<TResult>().FirstOrDefaultAsync();
-            }
-        }
-
-        public async Task<IEnumerable<TResult>> GetListAsyncUntracked<TResult>(
-            Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<T, TResult>>? selector = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null,
-            int? pageSize = null,
-            int? pageNumber = null)
-        {
-            IQueryable<T> query = _context.Set<T>();
-
-            if (include != null)
-            {
-                query = include.Compile()(query);
-            }
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (orderBy != null)
-            {
-                query = orderBy.Compile()(query);
-            }
-
-            if (pageSize.HasValue && pageNumber.HasValue)
-            {
-                query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
-            }
-
-            if (selector != null)
-            {
-                return await query.Select(selector).ToListAsync();
-            }
-            else
-            {
-                return await query.Cast<TResult>().ToListAsync();
-            }
-        }
-
         public async Task<T?> GetOneAsync(
             Expression<Func<T, bool>>? filter = null,
             Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null)
+            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null, bool disableTracking = true)
         {
             IQueryable<T> query = _context.Set<T>();
+
+            if (!disableTracking)
+            {
+                query = query.AsNoTracking();
+            }
 
             if (include != null)
             {
@@ -192,9 +116,14 @@ namespace HotelManagement.Infrastructure.Repository
             Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
             Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null,
             int? pageSize = null,
-            int? pageNumber = null)
+            int? pageNumber = null, bool disableTracking = true)
         {
             IQueryable<T> query = _context.Set<T>();
+
+            if (!disableTracking)
+            {
+                query = query.AsNoTracking();
+            }
 
             if (include != null)
             {
