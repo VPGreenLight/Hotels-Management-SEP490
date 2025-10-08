@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using HotelManagement.Application.Utilities;
 using HotelManagement.Domain.Models.Entities;
+using HotelManagement.Infrastructure.Utilities;
 using Task = System.Threading.Tasks.Task;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,8 +27,8 @@ builder.Services.AddDbConfig(builder.Configuration);
 builder.Services.AddSingleton<IConfig, Config>();
 builder.Services.AddScoped<IHotelManagementDataContext, HotelManagementDataContext>();
 
-// Thêm config các service phục vụ cho controller
-builder.Services.AddServiceCollections();
+builder.Services.RegisterScopedRepositories();
+builder.Services.RegisterScopedServices();
 
 builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<HotelManagementDataContext>()

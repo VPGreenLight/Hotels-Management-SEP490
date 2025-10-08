@@ -39,7 +39,7 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var entity = await _repository.GetOneAsyncUntracked<User>(f => f.Id == id);
+                var entity = await _repository.GetByIdAsync(id);
 
                 if (entity == null)
                 {
@@ -75,7 +75,7 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var entities = await _repository.GetListAsyncUntracked<User>();
+                var entities = await _repository.GetListAsync();
                 var dtos = _converter.ToListDTO(entities);
 
                 return new BaseResponseDto<IEnumerable<UserDto>>
@@ -221,7 +221,7 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var entity = await _repository.GetOneAsyncUntracked<User>(f => f.Id == id);
+                var entity = await _repository.GetByIdAsync(id);
 
                 if (entity == null)
                 {

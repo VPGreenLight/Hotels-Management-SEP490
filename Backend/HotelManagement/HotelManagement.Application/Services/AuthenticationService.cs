@@ -45,7 +45,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<LoginResponseDto>> AdminLogin(LoginRequestDto loginDto)
         {
-            var user = await _userRepository.GetOneAsyncUntracked<User>(
+            var user = await _userRepository.GetOneAsync(
                 filter: u => u.Email == loginDto.LoginEmail);
 
             if (user == null)
@@ -122,7 +122,7 @@ namespace HotelManagement.Application.Services
                 };
             }
 
-            var confirmEmail = await _confirmEmailRepository.GetOneAsyncUntracked<EmailConfirmation>(
+            var confirmEmail = await _confirmEmailRepository.GetOneAsync(
                 c => c.UserId == user.Id && c.ConfirmCode == request.ConfirmCode);
 
             if (confirmEmail == null || confirmEmail.ExpiresAt < DateTime.UtcNow)
@@ -153,7 +153,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<LoginResponseDto>> Login(LoginRequestDto request)
         {
-            var user = await _userRepository.GetOneAsyncUntracked<User>(filter: f => f.Email == request.LoginEmail);
+            var user = await _userRepository.GetOneAsync(filter: f => f.Email == request.LoginEmail);
             if (user == null)
             {
                 return new BaseResponseDto<LoginResponseDto>
@@ -204,12 +204,22 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<RefreshTokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
-            var userId = await _refreshTokenRepository.GetOneAsyncUntracked<Guid>(
-                filter: f => f.Token == request.RefreshToken && f.ExpiredTime > DateTime.UtcNow,
-                selector: s => s.UserId);
+            var refreshToken = await _refreshTokenRepository.GetOneAsync(
+                filter: f => f.Token == request.RefreshToken && f.ExpiredTime > DateTime.UtcNow);
 
-            var user = await _userRepository.GetOneAsyncUntracked<User>(
-                filter: f => f.Id == userId);
+            if (refreshToken == null)
+            {
+                return new BaseResponseDto<RefreshTokenResponseDto>
+                {
+                    Status = 401,
+                    Message = "Invalid refresh token",
+                    ResponseData = null
+                };
+            }
+            
+            var userId = refreshToken.UserId;
+
+            var user = await _userRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
@@ -242,7 +252,7 @@ namespace HotelManagement.Application.Services
             using var transaction = await _userRepository.BeginTransactionAsync();
             try
             {
-                var existingUser = await _userRepository.GetOneAsyncUntracked<User>(u => u.Email == request.Email);
+                var existingUser = await _userRepository.GetOneAsync(u => u.Email == request.Email);
                 if (existingUser != null)
                 {
                     return new BaseResponseDto<bool>
