@@ -1,6 +1,6 @@
 ﻿using Duende.IdentityModel;
+using HotelManagement.Application.AspModelService;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Application.IAspModelService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HotelManagement.Application.IServices;

@@ -1,9 +1,9 @@
-﻿namespace HotelManagement.Domain.PageModel
+﻿namespace HotelManagement.Domain.Models.PageModels
 {
     /// <summary>
     /// PageRequest là định nghĩa cho một object truy vấn phân trang cho 1 đối tượng
     /// </summary>
-    public class PagedRequest
+    public abstract class PagedRequest
     {
         /// <summary>
         /// PageIndex là định nghĩa cho số trang
