@@ -1,13 +1,15 @@
 using HotelManagement.Application.IServices;
 using HotelManagement.Application.Models.Dtos.All;
+using HotelManagement.Application.Models.Dtos.RequestDtos;
 using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Exceptions;
+using HotelManagement.Domain.Models.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelManagement.API.Controllers;
 
-[Authorize(Roles = "Admin")]
+// [Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class BranchController(IBranchService branchService) : BaseController
 {
@@ -41,6 +43,34 @@ public class BranchController(IBranchService branchService) : BaseController
                 Status = 500
             });
         }
+    }
+
+    [HttpPost("filter")]
+    public async Task<IActionResult> GetByFilter([FromBody] BaseRequestDto<GetBranchDto> requestDto)
+    {
+        if (requestDto.Data.PageNumber <= 0)
+            return BadRequest(new BaseResponseDto<string>
+            {
+                Status = 400,
+                ResponseData = "PageNumber cannot be less or equal than zero",
+            });
+
+        if (requestDto.Data.PageSize <= 0 && requestDto.Data.PageSize > 10000)
+        {
+            return BadRequest(new BaseResponseDto<string>
+            {
+                Status = 400,
+                ResponseData = "Invalid PageSize",
+            });
+        }
+        
+        var result = await branchService.GetAllAsync(requestDto.Data.Query, requestDto.Data.PageNumber, requestDto.Data.PageSize);
+        return Ok(new BaseResponseDto<Pagination<BranchDto>>
+        {
+            Status = 200,
+            ResponseData = result,
+            Message = "Get branches successfully!"
+        });
     }
 
     [HttpPost]
@@ -109,6 +139,36 @@ public class BranchController(IBranchService branchService) : BaseController
             {
                 Status = 500,
                 Message = ex.Message,
+            });
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteBranch(Guid id)
+    {
+        try
+        {
+            await branchService.DeleteByIdAsync(id);
+            return Ok(new BaseResponseDto<string>
+            {
+                Status = 200,
+                Message = "Branch deleted successfully!"
+            });
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new BaseResponseDto<string>
+            {
+                Status = 404,
+                Message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new BaseResponseDto<string>
+            {
+                Status = 500,
+                Message = ex.Message
             });
         }
     }

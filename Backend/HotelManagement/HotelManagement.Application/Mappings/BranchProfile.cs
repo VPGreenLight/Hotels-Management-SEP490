@@ -7,6 +7,6 @@ public class BranchProfile : PaginationProfile
 {
     public BranchProfile()
     {
-        CreateMap<Branch, BranchDto>();
+        CreateMap<Branch, BranchDto>().ReverseMap();
     }
 }

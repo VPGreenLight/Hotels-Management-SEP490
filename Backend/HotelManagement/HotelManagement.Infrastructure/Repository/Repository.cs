@@ -176,12 +176,16 @@ namespace HotelManagement.Infrastructure.Repository
             {
                 query = orderBy(query);
             }
+            else
+            {
+                query = query.OrderBy(e => EF.Property<object>(e, "Id"));
+            }
 
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return new Pagination<T>
             {
-                Items = await query.ToListAsync(),
+                Items = items,
                 PageIndex = pageNumber,
                 PageSize = pageSize,
                 TotalItems = totalItems

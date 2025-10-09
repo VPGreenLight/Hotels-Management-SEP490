@@ -52,7 +52,7 @@ public class BranchService(IRepository<Branch> branchRepo, IRepository<User> use
     {
         Expression<Func<Branch, bool>>? predicate = null;
 
-        if (!string.IsNullOrEmpty(query))
+        if (!string.IsNullOrWhiteSpace(query))
             predicate = b =>
                 b.Name.Contains(query) || (b.Address != null && b.Address.Contains(query));
         var branches =

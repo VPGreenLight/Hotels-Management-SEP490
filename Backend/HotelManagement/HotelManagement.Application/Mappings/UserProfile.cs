@@ -7,6 +7,6 @@ public class UserProfile : PaginationProfile
 {
     public UserProfile()
     {
-        CreateMap<User, UserDto>();
+        CreateMap<User, UserDto>().ReverseMap();
     }
 }
