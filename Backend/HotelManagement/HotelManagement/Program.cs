@@ -1,16 +1,13 @@
-﻿using HotelManagement.Application;
-using HotelManagement.Infrastructure.DataContext;
+﻿using HotelManagement.Infrastructure.DataContext;
 using HotelManagement.Infrastructure.Config;
-using HotelManagement.Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using AutoMapper;
 using HotelManagement.Application.Mappings;
 using HotelManagement.Application.Utilities;
-using HotelManagement.Domain.Models.Entities;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Infrastructure.Utilities;
 using Task = System.Threading.Tasks.Task;
 

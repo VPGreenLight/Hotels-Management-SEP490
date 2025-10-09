@@ -17,8 +17,4 @@
     <ProjectReference Include="..\HotelManagement.Infrastructure\HotelManagement.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Dtos\" />
-  </ItemGroup>
-
 </Project>

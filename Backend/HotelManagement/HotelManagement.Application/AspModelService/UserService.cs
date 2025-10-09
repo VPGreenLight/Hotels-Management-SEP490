@@ -2,7 +2,7 @@
 using HotelManagement.Application.Models.Dtos.RequestDtos;
 using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.Models.Entities;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Infrastructure.R2Storage;
 using HotelManagement.Infrastructure.Repository;
 using Microsoft.AspNetCore.Http;

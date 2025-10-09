@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using HotelManagement.Application.IServices;
-using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.Models.Entities;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Infrastructure.Repository;
 
 namespace HotelManagement.Application.Services
@@ -12,72 +11,28 @@ namespace HotelManagement.Application.Services
         where TModel : BaseEntity
         where TDto : BaseModelDto
     {
-        public async Task<BaseResponseDto<TDto>> GetByIdAsync(Guid id)
+        public async Task<TDto?> GetByIdAsync(Guid id)
         {
-            try
+            var entity = await repository.GetByIdAsync(id);
+            if (entity == null)
             {
-                var entity = await repository.GetByIdAsync(id);
-                if (entity == null)
-                {
-                    return new BaseResponseDto<TDto>
-                    {
-                        Status = 404,
-                        Message = "Entity not found.",
-                        ResponseData = null
-                    };
-                }
+                return null;
+            }
 
-                var dto = mapper.Map<TDto>(entity);
-                return new BaseResponseDto<TDto>
-                {
-                    Status = 200,
-                    Message = "Success",
-                    ResponseData = dto
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDto<TDto>
-                {
-                    Status = 500,
-                    Message = ex.Message,
-                    ResponseData = null
-                };
-            }
+            var dto = mapper.Map<TDto>(entity);
+            return dto;
         }
 
-        public async Task<BaseResponseDto<bool>> DeleteByIdAsync(Guid id)
+        public async Task<bool> DeleteByIdAsync(Guid id)
         {
-            try
+            var entity = await repository.GetByIdAsync(id);
+            if (entity == null)
             {
-                var entity = await repository.GetByIdAsync(id);
-                if (entity == null)
-                {
-                    return new BaseResponseDto<bool>
-                    {
-                        Status = 404,
-                        Message = "Entity not found.",
-                        ResponseData = false
-                    };
-                }
+                return false;
+            }
 
-                await repository.DeleteAsync(entity);
-                return new BaseResponseDto<bool>
-                {
-                    Status = 200,
-                    Message = "Delete successful",
-                    ResponseData = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDto<bool>
-                {
-                    Status = 500,
-                    Message = ex.Message,
-                    ResponseData = false
-                };
-            }
+            await repository.DeleteAsync(entity);
+            return true;
         }
     }
 }

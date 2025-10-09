@@ -1,5 +1,4 @@
-﻿using HotelManagement.Domain.Models;
-using HotelManagement.Domain.Models.Entities;
+﻿using HotelManagement.Domain.Entities;
 
 namespace HotelManagement.Infrastructure.Token
 {
