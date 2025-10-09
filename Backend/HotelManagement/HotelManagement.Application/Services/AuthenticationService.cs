@@ -3,9 +3,8 @@ using System.Text;
 using HotelManagement.Application.IServices;
 using HotelManagement.Application.Models.Dtos.RequestDtos;
 using HotelManagement.Application.Models.Dtos.ResponseDtos;
-using HotelManagement.Domain.Models;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Domain.Models.Constants;
-using HotelManagement.Domain.Models.Entities;
 using HotelManagement.Domain.Models.Enums;
 using HotelManagement.Infrastructure.Email;
 using HotelManagement.Infrastructure.Repository;
@@ -231,7 +230,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<bool>> Register(RegisterRequestDto request)
         {
-            using var transaction = await userRepository.BeginTransactionAsync();
+            // using var transaction = await userRepository.BeginTransactionAsync();
             try
             {
                 var existingUser = await userRepository.GetOneAsync(u => u.Email == request.Email);
@@ -267,7 +266,7 @@ namespace HotelManagement.Application.Services
 
                 await userRepository.AddAsync(newUser);
 
-                await userRepository.CommitTransactionAsync(transaction);
+                // await userRepository.CommitTransactionAsync(transaction);
 
                 return new BaseResponseDto<bool>
                 {
@@ -278,7 +277,7 @@ namespace HotelManagement.Application.Services
             }
             catch (Exception ex)
             {
-                await userRepository.RollbackTransactionAsync(transaction);
+                // await userRepository.RollbackTransactionAsync(transaction);
                 return new BaseResponseDto<bool>
                 {
                     Status = 500,

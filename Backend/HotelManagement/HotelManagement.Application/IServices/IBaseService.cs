@@ -6,7 +6,7 @@ namespace HotelManagement.Application.IServices
         where TModel : class
         where TDto : class
     {
-        Task<BaseResponseDto<TDto>> GetByIdAsync(Guid id);
-        Task<BaseResponseDto<bool>> DeleteByIdAsync(Guid id);
+        Task<TDto?> GetByIdAsync(Guid id);
+        Task<bool> DeleteByIdAsync(Guid id);
     }
 }

@@ -2,7 +2,7 @@
 using HotelManagement.Application.Models.Dtos.RequestDtos;
 using HotelManagement.Application.Models.Dtos.ResponseDtos;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.Models.Entities;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Infrastructure.R2Storage;
 using HotelManagement.Infrastructure.Repository;
 using Microsoft.AspNetCore.Http;
@@ -54,14 +54,14 @@ namespace HotelManagement.Application.AspModelService
             }
         }
 
-        public async Task<BaseResponseDto<IEnumerable<UserDto>>> GetAllAsync()
+        public async Task<BaseResponseDto<List<UserDto>>> GetAllAsync()
         {
             try
             {
                 var entities = await repository.GetListAsync();
-                var dtos = mapper.Map<IEnumerable<UserDto>>(entities);
+                var dtos = mapper.Map<List<UserDto>>(entities);
 
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 200,
                     Message = "Success",
@@ -70,7 +70,7 @@ namespace HotelManagement.Application.AspModelService
             }
             catch (Exception ex)
             {
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 500,
                     Message = ex.Message,
@@ -260,15 +260,15 @@ namespace HotelManagement.Application.AspModelService
             }
         }
 
-        public async Task<BaseResponseDto<IEnumerable<UserDto>>> GetManagerAsync()
+        public async Task<BaseResponseDto<List<UserDto>>> GetManagerAsync()
         {
             try
             {
                 var managers = await userManager.GetUsersInRoleAsync("Manager");
 
-                var dtos = mapper.Map<IEnumerable<UserDto>>(managers);
+                var dtos = mapper.Map<List<UserDto>>(managers);
 
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 200,
                     Message = "Success",
@@ -277,7 +277,7 @@ namespace HotelManagement.Application.AspModelService
             }
             catch (Exception ex)
             {
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 500,
                     Message = ex.Message,

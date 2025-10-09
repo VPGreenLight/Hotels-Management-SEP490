@@ -1,7 +1,9 @@
 ﻿using HotelManagement.Infrastructure.DataContext;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Data.Entity;
+// using System.Data.Entity;
 using System.Linq.Expressions;
+using HotelManagement.Domain.Models.Pagination;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagement.Infrastructure.Repository
 {
@@ -19,7 +21,7 @@ namespace HotelManagement.Infrastructure.Repository
             return await _context.Set<T>().FindAsync(id);
         }
 
-        public async Task<T?> GetByIdAsync(object id, Expression<Func<IQueryable<T>, IQueryable<T>>> include)
+        public async Task<T?> GetByIdAsync(object id, Func<IQueryable<T>, IQueryable<T>> include)
         {
             var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.FirstOrDefault();
             if (keyProperty == null)
@@ -34,9 +36,9 @@ namespace HotelManagement.Infrastructure.Repository
             var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
 
             IQueryable<T> query = _context.Set<T>();
-            
-            query = include.Compile()(query);
-            
+
+            query = include(query);
+
             return await query.Where(lambda).FirstOrDefaultAsync();
         }
 
@@ -83,8 +85,8 @@ namespace HotelManagement.Infrastructure.Repository
 
         public async Task<T?> GetOneAsync(
             Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null, bool disableTracking = true)
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null, bool disableTracking = true)
         {
             IQueryable<T> query = _context.Set<T>();
 
@@ -95,7 +97,7 @@ namespace HotelManagement.Infrastructure.Repository
 
             if (include != null)
             {
-                query = include.Compile()(query);
+                query = include(query);
             }
 
             if (filter != null)
@@ -105,29 +107,27 @@ namespace HotelManagement.Infrastructure.Repository
 
             if (orderBy != null)
             {
-                query = orderBy.Compile()(query);
+                query = orderBy(query);
             }
 
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>> GetListAsync(
+        public async Task<List<T>> GetListAsync(
             Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null,
-            int? pageSize = null,
-            int? pageNumber = null, bool disableTracking = true)
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null, bool disableTracking = true)
         {
             IQueryable<T> query = _context.Set<T>();
 
-            if (!disableTracking)
+            if (disableTracking)
             {
                 query = query.AsNoTracking();
             }
 
             if (include != null)
             {
-                query = include.Compile()(query);
+                query = include(query);
             }
 
             if (filter != null)
@@ -137,15 +137,59 @@ namespace HotelManagement.Infrastructure.Repository
 
             if (orderBy != null)
             {
-                query = orderBy.Compile()(query);
+                query = orderBy(query);
             }
 
-            if (pageSize.HasValue && pageNumber.HasValue)
-            {
-                query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
-            }
+            // if (pageSize.HasValue && pageNumber.HasValue)
+            // {
+            //     query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            // }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<Pagination<T>> GetPaginationAsync(Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null, int pageSize = 10,
+            int pageNumber = 1, bool disableTracking = true)
+        {
+            IQueryable<T> query = _context.Set<T>();
+
+            if (disableTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            var totalItems = await query.CountAsync();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+            else
+            {
+                query = query.OrderBy(e => EF.Property<object>(e, "Id"));
+            }
+
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return new Pagination<T>
+            {
+                Items = items,
+                PageIndex = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            };
         }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()

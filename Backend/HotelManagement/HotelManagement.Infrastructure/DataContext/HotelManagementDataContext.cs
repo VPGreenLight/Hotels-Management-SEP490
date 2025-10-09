@@ -1,10 +1,9 @@
-﻿using HotelManagement.Domain.Models;
-using HotelManagement.Domain.Models.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Linq.Expressions;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Domain.Models.Enums;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using NpgsqlTypes;

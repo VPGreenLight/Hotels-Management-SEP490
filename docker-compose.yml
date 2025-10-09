@@ -4,7 +4,6 @@ services:
     image: postgres:16-alpine
     container_name: hotel_postgres
     restart: unless-stopped
-    
     environment:
       # Database credentials
       POSTGRES_DB: ${POSTGRES_DB:-hotel_management}
