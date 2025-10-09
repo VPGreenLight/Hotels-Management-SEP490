@@ -230,7 +230,7 @@ namespace HotelManagement.Application.Services
 
         public async Task<BaseResponseDto<bool>> Register(RegisterRequestDto request)
         {
-            using var transaction = await userRepository.BeginTransactionAsync();
+            // using var transaction = await userRepository.BeginTransactionAsync();
             try
             {
                 var existingUser = await userRepository.GetOneAsync(u => u.Email == request.Email);
@@ -266,7 +266,7 @@ namespace HotelManagement.Application.Services
 
                 await userRepository.AddAsync(newUser);
 
-                await userRepository.CommitTransactionAsync(transaction);
+                // await userRepository.CommitTransactionAsync(transaction);
 
                 return new BaseResponseDto<bool>
                 {
@@ -277,7 +277,7 @@ namespace HotelManagement.Application.Services
             }
             catch (Exception ex)
             {
-                await userRepository.RollbackTransactionAsync(transaction);
+                // await userRepository.RollbackTransactionAsync(transaction);
                 return new BaseResponseDto<bool>
                 {
                     Status = 500,
