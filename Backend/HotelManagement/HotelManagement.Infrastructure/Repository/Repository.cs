@@ -1,6 +1,6 @@
 ﻿using HotelManagement.Infrastructure.DataContext;
 using Microsoft.EntityFrameworkCore.Storage;
-// using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using HotelManagement.Domain.Models.Pagination;
 using Microsoft.EntityFrameworkCore;

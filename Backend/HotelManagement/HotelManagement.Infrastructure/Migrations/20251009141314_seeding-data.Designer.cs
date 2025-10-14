@@ -4,6 +4,7 @@ using HotelManagement.Domain.Models.Enums;
 using HotelManagement.Infrastructure.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -13,9 +14,11 @@ using NpgsqlTypes;
 namespace HotelManagement.Infrastructure.Migrations
 {
     [DbContext(typeof(HotelManagementDataContext))]
-    partial class HotelManagementDataContextModelSnapshot : ModelSnapshot
+    [Migration("20251009141314_seeding-data")]
+    partial class seedingdata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

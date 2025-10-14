@@ -1,7 +1,14 @@
-export const API = import.meta.env.VITE_API_BASE_URL;
+export const API = import.meta.env.VITE_API_BASE_URL || "https://localhost:7219/api/";
 export const API_LOCAL = import.meta.env.VITE_API_LOCAL_BASE_URL;
 export const API_LOCAL_CATEGORY = import.meta.env.VITE_API_LOCAL_CATEGORY;
 export const endpoints = {
+   auth: {
+    login: "Authentication/login",
+    adminLogin: "Authentication/admin-login",
+    me: "Authentication/me",
+    sendEmail: "Authentication/send-confirmation-code",
+    confirmEmail: "Authentication/confirm-email"
+  },
   security: {
     profile: `security/profile`,
   },

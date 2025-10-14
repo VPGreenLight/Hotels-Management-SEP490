@@ -254,6 +254,7 @@ namespace HotelManagement.Application.Services
                     UserName = request.UserName,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
+                    Address = request.Address,
                     DateOfBirth = request.DateOfBirth,
                     Gender = request.Gender,
                     PhoneNumber = request.PhoneNumber,

@@ -1,20 +1,22 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import axios, { AxiosRequestConfig, Method } from "axios";
+import {API} from "./endpoints";
+import axios from "axios";
+import type { AxiosRequestConfig, Method } from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
+  baseURL: API,
   timeout: 60000,
-}); 
+  withCredentials: true,
+});
+
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    // const token = localStorage.getItem("user_token");
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
-    const token = Cookies.get("Token");
+   const token = Cookies.get("accessToken") || localStorage.getItem("Token");
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,65 +29,43 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    let status: boolean = false;
-    if (response?.status === 200 || response?.status === 201) {
-      status = true;
-    }
-
     return {
-      status: status,
-      message: response?.data?.message || "success",
-      result: response.data,
+      status: response?.data?.status || response?.status || 200,
+      message: response?.data?.message || "Success",
+      responseData: response?.data?.responseData ?? null,
     };
   },
   (error) => {
     console.log(error);
     let errorMessage = "Lỗi hệ thống";
 
-    if (error?.message?.includes("Lỗi hệ thống")) {
-      errorMessage = "Lỗi hệ thống";
-    } else if (error.response) {
+    if (error.response) {
       const { status, data } = error.response;
+      errorMessage = data?.message || errorMessage;
 
-      if (status === 401) {
-        // window.localStorage.clear();
-        // window.location.href = "/login";
-        return Promise.reject({
-          status: false,
-          message: "Tài khoản không có quyền",
-          result: null,
-        });
-      } else if (status === 400) {
-        errorMessage = data?.message;
-
-        if (errorMessage === "Tài khoàn hết hạn truy cập") {
-          window.localStorage.clear();
-        }
-
-        return Promise.reject({
-          status: false,
-          message: errorMessage,
-          result: null,
-        });
-      } else if (status === 404 || status === 502) {
-        errorMessage = data?.message || "Lỗi hệ thống";
-        return Promise.reject({
-          status: false,
-          message: errorMessage,
-          result: null,
-        });
-      }
+      return Promise.reject({
+        status,
+        message: errorMessage,
+        responseData: null,
+      });
     }
-    return Promise.reject(error);
+
+    return Promise.reject({
+      status: 500,
+      message: errorMessage,
+      responseData: null,
+    });
   }
 );
 
 export type Response<T = any> = {
-  status: boolean;
+  status: number;
   message: string;
-  result: T;
+  responseData: T;
 };
-
+export type LoginAdminResponse = Response<any> & {
+  userInfo?: any;
+};
 export type MyResponse<T = any> = Promise<Response<T>>;
 
 /**

@@ -1,13 +1,26 @@
-import { Routes, Route } from 'react-router-dom'; 
-import Home from './pages/Home.tsx'; 
-
+import { Routes, Route, Navigate } from 'react-router-dom'; 
+import Login from './pages/Auth/Login.tsx';
+import { useEffect } from 'react';
+import {  getUserRole } from './utils/auth.ts';
+import AdminLogin from './pages/Auth/AdminLogin.tsx';
+import AdminDashboard from './pages/admin/AdminDashboard.tsx';
 function App() {
+    useEffect(() => {
+    const user = getUserRole();
+    if (user) {
+    } else {
+    }
+  }, []);
   return (
     <Routes>
-      <Route path="/" element={<Home />} />  // Route trang chủ
-      {/* <Route path="*" element={<NotFound />} />  // Route 404 (bắt tất cả) */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} /> 
+      <Route path="/admin-login" element={<AdminLogin />} />  
+      <Route path="/admin/dashboard" element={<AdminDashboard />} /> 
     </Routes>
   );
 }
 
 export default App;
+
+
