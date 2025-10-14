@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using HotelManagement.Domain.Entities;
 
 namespace HotelManagement.Infrastructure.Token
 {
@@ -16,7 +17,8 @@ namespace HotelManagement.Infrastructure.Token
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
 
-        public TokenService(IRepository<RefreshToken> refreshTokenRepository, IConfiguration configuration, UserManager<User> userManager)
+        public TokenService(IRepository<RefreshToken> refreshTokenRepository, IConfiguration configuration,
+            UserManager<User> userManager)
         {
             _refreshTokenRepository = refreshTokenRepository;
             _configuration = configuration;
@@ -28,7 +30,11 @@ namespace HotelManagement.Infrastructure.Token
             var secretKey = _configuration["JWT:Secret"];
             var issuer = _configuration["JWT:ValidIssuer"];
             var audience = _configuration["JWT:ValidAudience"];
-            var tokenValidityInHours = int.TryParse(_configuration["JWT:TokenValidityInHours"], out int hours) ? hours : 8;
+            var tokenValidityInHours =
+                int.TryParse(_configuration["JWT:TokenValidityInHours"], out int hours) ? hours : 8;
+
+            if (string.IsNullOrEmpty(secretKey))
+                throw new InvalidOperationException("Secret key is empty");
 
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
@@ -37,9 +43,9 @@ namespace HotelManagement.Infrastructure.Token
             var claims = new List<Claim>
             {
                 new(JwtClaimTypes.Id, user.Id.ToString()),
-                new(JwtClaimTypes.Name, user.UserName),
-                new(JwtClaimTypes.Email, user.Email),
-                new(JwtClaimTypes.GivenName, user.FullName),
+                new(JwtClaimTypes.Name, user.UserName!),
+                new(JwtClaimTypes.Email, user.Email!),
+                new(JwtClaimTypes.GivenName, $"{user.FirstName} {user.LastName}"),
             };
 
             foreach (var role in userRoles)
@@ -50,7 +56,7 @@ namespace HotelManagement.Infrastructure.Token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddHours(tokenValidityInHours),
+                Expires = DateTime.UtcNow.AddHours(tokenValidityInHours),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
@@ -65,24 +71,27 @@ namespace HotelManagement.Infrastructure.Token
 
         public async Task<string> CreateRefreshTokenAsync(User user)
         {
-            var existingTokens = await _refreshTokenRepository.GetListAsync(x => x.UserId == user.Id);
+            var existingTokens = await _refreshTokenRepository.GetListAsync(x => x.UserId == user.Id,
+                orderBy: o => o.OrderBy(r => r.ExpiredTime));
 
             var lastToken = existingTokens.LastOrDefault();
 
             if (lastToken != null && lastToken.ExpiredTime > DateTime.Now)
             {
-                return lastToken.Token;
+                return lastToken.Token!;
             }
 
             var refreshToken = Guid.NewGuid().ToString();
-            var refreshTokenValidity = int.TryParse(_configuration["JWT:RefreshTokenValidityInDays"], out int validity) ? validity : 7;
+            var refreshTokenValidity = int.TryParse(_configuration["JWT:RefreshTokenValidityInDays"], out int validity)
+                ? validity
+                : 7;
 
             var refreshTokenEntity = new RefreshToken
             {
                 Token = refreshToken,
                 UserId = user.Id,
-                CreateTime = DateTime.Now,
-                ExpiredTime = DateTime.Now.AddDays(refreshTokenValidity),
+                CreateTime = DateTime.UtcNow,
+                ExpiredTime = DateTime.UtcNow.AddDays(refreshTokenValidity),
             };
 
             await _refreshTokenRepository.AddAsync(refreshTokenEntity);

@@ -1,12 +1,15 @@
-﻿using HotelManagement.Application;
-using HotelManagement.Infrastructure.DataContext;
+﻿using HotelManagement.Infrastructure.DataContext;
 using HotelManagement.Infrastructure.Config;
-using HotelManagement.Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using HotelManagement.Application.Mappings;
+using HotelManagement.Application.Utilities;
+using HotelManagement.Domain.Entities;
+using HotelManagement.Infrastructure.Utilities;
+using Task = System.Threading.Tasks.Task;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,14 +20,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Thêm config cho SQL Server
+// Add config for SQL
 builder.Services.AddDbConfig(builder.Configuration);
 
 builder.Services.AddSingleton<IConfig, Config>();
 builder.Services.AddScoped<IHotelManagementDataContext, HotelManagementDataContext>();
 
-// Thêm config các service phục vụ cho controller
-builder.Services.AddServiceCollections();
+builder.Services.RegisterScopedRepositories();
+builder.Services.RegisterScopedServices();
+
+builder.Services.AddAutoMapper(config => { }, typeof(MapProfile).Assembly);
 
 builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<HotelManagementDataContext>()
@@ -89,10 +94,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 app.UseCors("CORS-Allow");
 
-app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
