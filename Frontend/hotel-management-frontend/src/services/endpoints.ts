@@ -9,6 +9,13 @@ export const endpoints = {
     sendEmail: "Authentication/send-confirmation-code",
     confirmEmail: "Authentication/confirm-email"
   },
+  branches: {
+    all: "Branch/filter",
+    getBranchById: (id: string) => `Branch/${id}`,
+    createBranch:"Branch",
+    updateBranch:"Branch",
+    deleteBranch:(id:string)=>`Branch/${id}`,
+  },
   security: {
     profile: `security/profile`,
   },
