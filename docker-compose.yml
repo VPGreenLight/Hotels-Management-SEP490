@@ -1,0 +1,155 @@
+services:
+  # ==================== PostgreSQL Database ====================
+  postgres:
+    image: postgres:16-alpine
+    container_name: hotel_postgres
+    restart: unless-stopped
+    environment:
+      # Database credentials
+      POSTGRES_DB: ${POSTGRES_DB:-hotel_management}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+      
+      # Timezone
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+      
+      # Performance tuning
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
+    
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql/data
+      
+      # Initialization scripts (optional)
+      - ./docker/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
+      
+      # Custom PostgreSQL configuration (optional)
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-hotel_management}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    networks:
+      - hotel_network
+
+  # ==================== KeyDB (Redis-compatible Cache) ====================
+  keydb:
+    image: eqalpha/keydb:alpine
+    container_name: hotel_keydb
+    restart: unless-stopped
+    
+    environment:
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    
+    command: >
+      keydb-server
+      --server-threads 4
+      --requirepass ${KEYDB_PASSWORD:-keydb_password}
+      --maxmemory ${KEYDB_MAXMEMORY:-256mb}
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --loglevel notice
+    
+    ports:
+      - "${KEYDB_PORT:-6379}:6379"
+    
+    volumes:
+      # Persistent data storage
+      - keydb_data:/data
+      
+      # Custom KeyDB configuration (optional)
+      # - ./docker/keydb/keydb.conf:/etc/keydb/keydb.conf:ro
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "keydb-cli", "--no-auth-warning", "-a", "${KEYDB_PASSWORD:-keydb_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    
+    networks:
+      - hotel_network
+
+  # ==================== pgAdmin (Optional - Database Management UI) ====================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hotel_pgadmin
+    restart: unless-stopped
+    
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@hotel.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin_password}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      
+      # Pre-configured servers (optional)
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    networks:
+      - hotel_network
+
+  # ==================== RedisInsight (Optional - KeyDB Management UI) ====================
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: hotel_redis_insight
+    restart: unless-stopped
+    
+    ports:
+      - "${REDIS_INSIGHT_PORT:-5540}:5540"
+    
+    volumes:
+      - redis_insight_data:/data
+    
+    depends_on:
+      keydb:
+        condition: service_healthy
+    
+    networks:
+      - hotel_network
+
+# ==================== Networks ====================
+networks:
+  hotel_network:
+    driver: bridge
+    name: hotel_network
+
+# ==================== Volumes ====================
+volumes:
+  postgres_data:
+    driver: local
+    name: hotel_postgres_data
+  
+  keydb_data:
+    driver: local
+    name: hotel_keydb_data
+  
+  pgadmin_data:
+    driver: local
+    name: hotel_pgadmin_data
+  
+  redis_insight_data:
+    driver: local
+    name: hotel_redis_insight_data

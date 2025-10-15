@@ -1,44 +1,28 @@
-﻿using HotelManagement.Infrastructure.Repository;
-using HotelManagement.Infrastructure.Converter;
-using HotelManagement.Application.IAspModelService;
+﻿using AutoMapper;
+using HotelManagement.Application.Models.Dtos.RequestDtos;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
+using HotelManagement.Domain.Dtos;
+using HotelManagement.Domain.Entities;
 using HotelManagement.Infrastructure.R2Storage;
+using HotelManagement.Infrastructure.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using HotelManagement.Domain.Models;
-using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.ResponseDtos;
-using HotelManagement.Domain.RequestDtos;
 
-namespace HotelManagement.Services.AspModelService
+namespace HotelManagement.Application.AspModelService
 {
-    public class UserService : IUserService
+    public class UserService(
+        IRepository<User> repository,
+        UserManager<User> userManager,
+        IMapper mapper,
+        IConfiguration configuration,
+        IR2StorageService r2StorageService) : IUserService
     {
-        private readonly IRepository<User> _repository;
-        private readonly UserManager<User> _userManager;
-        private readonly IConverter<User, UserDto> _converter;
-        private readonly IConfiguration _configuration;
-        private readonly IR2StorageService _r2StorageService;
-
-        public UserService(
-            IRepository<User> repository,
-            UserManager<User> userManager,
-            IConverter<User, UserDto> converter,
-            IConfiguration configuration,
-            IR2StorageService r2StorageService)
-        {
-            _repository = repository;
-            _userManager = userManager;
-            _converter = converter;
-            _configuration = configuration;
-            _r2StorageService = r2StorageService;
-        }
-
         public async Task<BaseResponseDto<UserDto>> GetByIdAsync(Guid id)
         {
             try
             {
-                var entity = await _repository.GetOneAsyncUntracked<User>(f => f.Id == id);
+                var entity = await repository.GetByIdAsync(id);
 
                 if (entity == null)
                 {
@@ -50,8 +34,10 @@ namespace HotelManagement.Services.AspModelService
                     };
                 }
 
-                var dto = _converter.ToDTO(entity);
-
+                var dto = mapper.Map<UserDto>(entity);
+                var roles = await userManager.GetRolesAsync(entity);
+                dto.Roles = roles.ToList();
+                
                 return new BaseResponseDto<UserDto>
                 {
                     Status = 200,
@@ -70,14 +56,14 @@ namespace HotelManagement.Services.AspModelService
             }
         }
 
-        public async Task<BaseResponseDto<IEnumerable<UserDto>>> GetAllAsync()
+        public async Task<BaseResponseDto<List<UserDto>>> GetAllAsync()
         {
             try
             {
-                var entities = await _repository.GetListAsyncUntracked<User>();
-                var dtos = _converter.ToListDTO(entities);
+                var entities = await repository.GetListAsync();
+                var dtos = mapper.Map<List<UserDto>>(entities);
 
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 200,
                     Message = "Success",
@@ -86,7 +72,7 @@ namespace HotelManagement.Services.AspModelService
             }
             catch (Exception ex)
             {
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 500,
                     Message = ex.Message,
@@ -99,8 +85,8 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var model = _converter.ToModel(dto);
-                await _repository.AddAsync(model);
+                var model = mapper.Map<User>(dto);
+                await repository.AddAsync(model);
 
                 return new BaseResponseDto<bool>
                 {
@@ -124,13 +110,13 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var entity = await _repository.GetOneAsync(filter: f => f.Id == dto.Id);
+                var entity = await repository.GetOneAsync(filter: f => f.Id == dto.Id);
                 if (entity == null)
                 {
                     return new BaseResponseDto<bool>
                     {
                         Status = 404,
-                        Message = "User not found",
+                        Message = "User not found!",
                         ResponseData = false
                     };
                 }
@@ -148,7 +134,7 @@ namespace HotelManagement.Services.AspModelService
                     }
                 }
 
-                await _repository.UpdateAsync(entity);
+                await repository.UpdateAsync(entity);
 
                 return new BaseResponseDto<bool>
                 {
@@ -172,7 +158,7 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var user = await _repository.GetOneAsync(filter: f => f.Id == dto.UserId);
+                var user = await repository.GetOneAsync(filter: f => f.Id == dto.UserId);
                 if (user == null)
                 {
                     return new BaseResponseDto<bool>
@@ -196,7 +182,7 @@ namespace HotelManagement.Services.AspModelService
                     }
                 }
 
-                await _repository.UpdateAsync(user);
+                await repository.UpdateAsync(user);
 
                 return new BaseResponseDto<bool>
                 {
@@ -220,7 +206,7 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var entity = await _repository.GetOneAsyncUntracked<User>(f => f.Id == id);
+                var entity = await repository.GetByIdAsync(id);
 
                 if (entity == null)
                 {
@@ -232,7 +218,7 @@ namespace HotelManagement.Services.AspModelService
                     };
                 }
 
-                await _repository.DeleteAsync(entity);
+                await repository.DeleteAsync(entity);
 
                 return new BaseResponseDto<bool>
                 {
@@ -256,7 +242,7 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var count = await _repository.GetCount();
+                var count = await repository.GetCount();
 
                 return new BaseResponseDto<int>
                 {
@@ -276,15 +262,15 @@ namespace HotelManagement.Services.AspModelService
             }
         }
 
-        public async Task<BaseResponseDto<IEnumerable<UserDto>>> GetManagerAsync()
+        public async Task<BaseResponseDto<List<UserDto>>> GetManagerAsync()
         {
             try
             {
-                var managers = await _userManager.GetUsersInRoleAsync("Manager");
+                var managers = await userManager.GetUsersInRoleAsync("Manager");
 
-                var dtos = _converter.ToListDTO(managers);
+                var dtos = mapper.Map<List<UserDto>>(managers);
 
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 200,
                     Message = "Success",
@@ -293,7 +279,7 @@ namespace HotelManagement.Services.AspModelService
             }
             catch (Exception ex)
             {
-                return new BaseResponseDto<IEnumerable<UserDto>>
+                return new BaseResponseDto<List<UserDto>>
                 {
                     Status = 500,
                     Message = ex.Message,
@@ -306,21 +292,21 @@ namespace HotelManagement.Services.AspModelService
         {
             try
             {
-                var user = await _repository.GetByIdAsync(userId);
+                var user = await repository.GetByIdAsync(userId);
                 if (user == null)
                 {
                     return new BaseResponseDto<string>
                     {
                         Status = 404,
-                        Message = "Người dùng không tồn tại",
+                        Message = "User not found!",
                         ResponseData = null
                     };
                 }
 
-                var fileUrl = await _r2StorageService.UploadFileAsync(file, "avatars", userId.ToString());
+                var fileUrl = await r2StorageService.UploadFileAsync(file, "avatars", userId.ToString());
 
                 user.AvatarUrl = fileUrl;
-                await _repository.UpdateAsync(user);
+                await repository.UpdateAsync(user);
 
                 return new BaseResponseDto<string>
                 {

@@ -1,7 +1,9 @@
 ﻿using HotelManagement.Infrastructure.DataContext;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Data.Entity;
+// using System.Data.Entity;
 using System.Linq.Expressions;
+using HotelManagement.Domain.Models.Pagination;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagement.Infrastructure.Repository
 {
@@ -19,13 +21,8 @@ namespace HotelManagement.Infrastructure.Repository
             return await _context.Set<T>().FindAsync(id);
         }
 
-        public async Task<T?> GetByIdAsync(object id, Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null)
+        public async Task<T?> GetByIdAsync(object id, Func<IQueryable<T>, IQueryable<T>> include)
         {
-            if (include == null)
-            {
-                return await _context.Set<T>().FindAsync(id);
-            }
-
             var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.FirstOrDefault();
             if (keyProperty == null)
             {
@@ -40,10 +37,7 @@ namespace HotelManagement.Infrastructure.Repository
 
             IQueryable<T> query = _context.Set<T>();
 
-            if (include != null)
-            {
-                query = include.Compile()(query);
-            }
+            query = include(query);
 
             return await query.Where(lambda).FirstOrDefaultAsync();
         }
@@ -89,89 +83,21 @@ namespace HotelManagement.Infrastructure.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TResult?> GetOneAsyncUntracked<TResult>(
-            Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<T, TResult>>? selector = null, Expression<Func<IQueryable<T>,
-            IQueryable<T>>>? include = null)
-        {
-            IQueryable<T> query = _context.Set<T>().AsNoTracking();
-
-            if (include != null)
-            {
-                query = include.Compile()(query);
-            }
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (orderBy != null)
-            {
-                query = orderBy.Compile()(query);
-            }
-
-            if (selector != null)
-            {
-                return await query.Select(selector).FirstOrDefaultAsync();
-            }
-            else
-            {
-                return await query.Cast<TResult>().FirstOrDefaultAsync();
-            }
-        }
-
-        public async Task<IEnumerable<TResult>> GetListAsyncUntracked<TResult>(
-            Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<T, TResult>>? selector = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null,
-            int? pageSize = null,
-            int? pageNumber = null)
-        {
-            IQueryable<T> query = _context.Set<T>();
-
-            if (include != null)
-            {
-                query = include.Compile()(query);
-            }
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (orderBy != null)
-            {
-                query = orderBy.Compile()(query);
-            }
-
-            if (pageSize.HasValue && pageNumber.HasValue)
-            {
-                query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
-            }
-
-            if (selector != null)
-            {
-                return await query.Select(selector).ToListAsync();
-            }
-            else
-            {
-                return await query.Cast<TResult>().ToListAsync();
-            }
-        }
-
         public async Task<T?> GetOneAsync(
             Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null)
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null, bool disableTracking = true)
         {
             IQueryable<T> query = _context.Set<T>();
 
+            if (!disableTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
             if (include != null)
             {
-                query = include.Compile()(query);
+                query = include(query);
             }
 
             if (filter != null)
@@ -181,24 +107,27 @@ namespace HotelManagement.Infrastructure.Repository
 
             if (orderBy != null)
             {
-                query = orderBy.Compile()(query);
+                query = orderBy(query);
             }
 
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>> GetListAsync(
+        public async Task<List<T>> GetListAsync(
             Expression<Func<T, bool>>? filter = null,
-            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>>? orderBy = null,
-            Expression<Func<IQueryable<T>, IQueryable<T>>>? include = null,
-            int? pageSize = null,
-            int? pageNumber = null)
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null, bool disableTracking = true)
         {
             IQueryable<T> query = _context.Set<T>();
 
+            if (disableTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
             if (include != null)
             {
-                query = include.Compile()(query);
+                query = include(query);
             }
 
             if (filter != null)
@@ -208,15 +137,59 @@ namespace HotelManagement.Infrastructure.Repository
 
             if (orderBy != null)
             {
-                query = orderBy.Compile()(query);
+                query = orderBy(query);
             }
 
-            if (pageSize.HasValue && pageNumber.HasValue)
-            {
-                query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
-            }
+            // if (pageSize.HasValue && pageNumber.HasValue)
+            // {
+            //     query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            // }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<Pagination<T>> GetPaginationAsync(Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null, int pageSize = 10,
+            int pageNumber = 1, bool disableTracking = true)
+        {
+            IQueryable<T> query = _context.Set<T>();
+
+            if (disableTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            var totalItems = await query.CountAsync();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+            else
+            {
+                query = query.OrderBy(e => EF.Property<object>(e, "Id"));
+            }
+
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return new Pagination<T>
+            {
+                Items = items,
+                PageIndex = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            };
         }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()

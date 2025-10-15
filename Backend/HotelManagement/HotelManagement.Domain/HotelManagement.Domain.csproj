@@ -9,9 +9,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <ProjectReference Include="..\HotelManagement.Common\HotelManagement.Common.csproj" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
 	</ItemGroup>
 </Project>

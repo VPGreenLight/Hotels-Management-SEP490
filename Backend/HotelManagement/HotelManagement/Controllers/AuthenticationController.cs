@@ -1,12 +1,13 @@
 ﻿using Duende.IdentityModel;
+using HotelManagement.Application.AspModelService;
 using HotelManagement.Domain.Dtos;
-using HotelManagement.Domain.RequestDtos;
-using HotelManagement.Domain.ResponseDtos;
-using HotelManagement.Application.IAspModelService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HotelManagement.Application.IServices;
-
+using HotelManagement.Application.Models.Dtos.RequestDtos;
+using HotelManagement.Application.Models.Dtos.ResponseDtos;
+//Todo: Use BaseRequest as input for non-get method below.
+//Todo: Configure [Authorize] for Controller for better security.
 namespace HotelManagement.API.Controllers
 {
     [Route("api/[controller]")]
