@@ -34,7 +34,7 @@ const AdminLogin: React.FC = () => {
   // const handleGoogleLogin = async () => {
   //   try {
   //     console.log("Google Login clicked");
- 
+
   //   } catch (err) {
   //     console.error("Google login error:", err);
   //   }
@@ -105,6 +105,7 @@ const AdminLogin: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              
             </div>
             <button
               type="submit"
@@ -166,7 +167,15 @@ const AdminLogin: React.FC = () => {
               {message}
             </p>
           )}
-
+          <p className="text-center text-sm text-gray-600">
+            Quay lại{" "}
+            <span
+              onClick={() => navigate("/login")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
+              chọn loại tài khoản
+            </span>
+          </p>
           {/* Footer */}
           <div className="mt-10 text-center text-sm text-gray-500">
             © {new Date().getFullYear()} Tân Trường Sơn Hotel Management System

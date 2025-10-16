@@ -33,7 +33,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ children }) => {
           return;
         }
 
-        // Nếu chưa có thì gọi API /me
+       
         const res = await request("get", endpoints.auth.me, {}, { withCredentials: true });
         if (res.status === 200 && res.responseData) {
           const data = res.responseData;
